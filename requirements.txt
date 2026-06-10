@@ -1,0 +1,6 @@
+SpeechRecognition==3.10.0
+pyaudio==0.2.13
+kokoro==0.3.0
+sounddevice==0.4.6
+openai==1.41.1
+python-dotenv==1.0.0
