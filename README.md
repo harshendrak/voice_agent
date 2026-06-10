@@ -12,22 +12,53 @@ An intelligent voice assistant that listens to user input, processes it with Goo
 
 ## System Architecture
 
-```mermaid
-graph LR
-    A[User Voice Input] -->|Microphone| B[Speech Recognition<br/>STT]
-    B -->|Google Speech API| C[Text Processing]
-    C -->|User Text| D[Google Gemini 3.5 Flash<br/>LLM]
-    D -->|AI Response| E[Text-to-Speech<br/>Kokoro TTS]
-    E -->|Audio Pipeline| F[Speaker<br/>Audio Output]
-    F -->|Voice Response| G[User Hears Response]
-    
-    style A fill:#e1f5ff
-    style B fill:#fff3e0
-    style C fill:#f3e5f5
-    style D fill:#e8f5e9
-    style E fill:#fce4ec
-    style F fill:#e0f2f1
-    style G fill:#e1f5ff
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     VOICE ASSISTANT PIPELINE                      │
+└─────────────────────────────────────────────────────────────────┘
+
+    🎤 USER INPUT
+       │
+       │ (Audio via Microphone)
+       ▼
+┌──────────────────────────────┐
+│  SPEECH RECOGNITION (STT)    │
+│  SpeechRecognition + Google  │
+│  • Capture audio             │
+│  • Adjust ambient noise       │
+│  • Convert to text           │
+└──────────────────────────────┘
+       │
+       │ (User text string)
+       ▼
+┌──────────────────────────────┐
+│  AI LANGUAGE MODEL           │
+│  Google Gemini 3.5 Flash     │
+│  • System prompt applied     │
+│  • Generate response         │
+│  • Ensure voice-friendly     │
+└──────────────────────────────┘
+       │
+       │ (AI response text)
+       ▼
+┌──────────────────────────────┐
+│  TEXT-TO-SPEECH (TTS)        │
+│  Kokoro 82M Model            │
+│  • Language: English          │
+│  • Voice: af_heart           │
+│  • Sample rate: 24kHz        │
+└──────────────────────────────┘
+       │
+       │ (Audio stream)
+       ▼
+    🔊 SPEAKER OUTPUT
+       │
+       └─► User Hears Response
+```
+
+### Data Flow
+```
+User Speech → STT → Plain Text → LLM → Response Text → TTS → Speaker Audio
 ```
 
 ## Workflow
