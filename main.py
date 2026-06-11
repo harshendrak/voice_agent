@@ -4,6 +4,7 @@ from kokoro import KPipeline
 import sounddevice as sd
 from openai import OpenAI
 from dotenv import load_dotenv
+import re
 
 import warnings
 
@@ -23,6 +24,7 @@ def speak(text):
         sd.wait()
     
 
+
 def main():
     while True:
         r = sr.Recognizer() #Speech to Text
@@ -36,16 +38,24 @@ def main():
             
             print("Processing audio (STT)")
 
-            SYSTEM_PRMPT =  f"""
+            SYSTEM_PROMPT =  f"""
             You are a voice assistant.
+
+            Think silently.
+            Never reveal your reasoning.
+            Never reveal intermediate thoughts.
+            Never output thinking process.
+            Never output <thought> tags.
+            Only output the final answer.
+
             Respond naturally for spoken conversation.
-            Do not use markdown.
-            Do not use bullet points.
-            Do not use numbered lists.
-            Do not use paragraph breaks.
-            Keep responses concise and easy to speak aloud.
+            Keep responses concise.
+            Avoid markdown.
+            Avoid lists.
+            Avoid special formatting.
 """
 
+          
 
             stt = r.recognize_google(audio) #type: ignore
 
@@ -54,10 +64,10 @@ def main():
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
     )
             response = client.chat.completions.create(
-        model="gemini-3.5-flash",
+        model="gemma-4-31b-it",
         messages=[
             {   "role": "system",
-                "content": SYSTEM_PRMPT
+                "content": SYSTEM_PROMPT
             },
             {
                 "role": "user",
@@ -66,7 +76,14 @@ def main():
         ]
     )
 
-        tts = response.choices[0].message.content
+        tts = response.choices[0].message.content or ""
+
+        tts = re.sub(
+        r"<thought>.*?</thought>",
+        "",
+        tts,
+        flags=re.DOTALL
+        ).strip()
 
         print("Assistant:", tts)
 
